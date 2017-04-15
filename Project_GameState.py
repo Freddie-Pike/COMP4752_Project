@@ -12,9 +12,9 @@ class GameState:
 
         # Initializes all the variables that help with putting and moving pieces.
         self.selected_piece = (-1, -1) # Used for highlighting potential moves.
-        self.red_piece_list = STARTING_RED_POSITIONS # [(0,1), (0,3), (0,5), (0,7), (1,0), (1,2), (1,4), (1,6), (2,1), (2,3), (2,5), (2,7) ] # All red pieces at bottom.
+        self.red_piece_list =  [(0,1), (0,3), (0,5), (0,7), (1,0), (1,2), (1,4), (1,6), (2,1), (2,3), (2,5), (2,7) ] # All red pieces at bottom. # STARTING_RED_POSITIONS
         print("rpl ----- ", self.red_piece_list)
-        self.black_piece_list = STARTING_BLACK_POSITIONS # [ (7,0), (7,2), (7,4), (7,6), (6,1), (6,3), (6,5), (6,7), (5,0), (5,2), (5,4), (5,6) ] # All black pieces at top.
+        self.black_piece_list = [ (7,0), (7,2), (7,4), (7,6), (6,1), (6,3), (6,5), (6,7), (5,0), (5,2), (5,4), (5,6) ] # All black pieces at top. # STARTING_BLACK_POSITIONS
         self.red_piece_potential_move_list = [] # No potential red moves at init.
         self.black_piece_potential_move_list = [] # No potential black moves at init.
         print("GameState init completed")
