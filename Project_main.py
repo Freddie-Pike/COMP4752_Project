@@ -87,10 +87,9 @@ class Checkers:
             row, col = self.display_state.rows() - 1 - piece[0], piece[1]
             pg.draw.circle(surface, color, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD)
 
-    # reset the game to a blank board
+    # reset the game to a the default state board
     def reset(self):
         print("Reset")
-        print("starter is ", STARTING_RED_POSITIONS)
         self.winner = PLAYER_NONE
         self.display_state = DisplayState(BOARD_ROWS, BOARD_COLS)
         self.player_states[0] = P1GameState(BOARD_ROWS, BOARD_COLS)
@@ -164,6 +163,8 @@ class Checkers:
 
                     # If player didn't click on potential move then show them instead.
                     self.display_state.highlight_potential_moves(move)
+                    self.player_states[0].highlight_potential_moves(move)
+                    self.player_states[1].highlight_potential_moves(move)
 
         
 # This is the main executable part of the program.
