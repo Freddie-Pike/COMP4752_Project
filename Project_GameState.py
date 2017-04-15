@@ -12,11 +12,12 @@ class GameState:
 
         # Initializes all the variables that help with putting and moving pieces.
         self.selected_piece = (-1, -1) # Used for highlighting potential moves.
-        self.red_piece_list =  [(0,1), (0,3), (0,5), (0,7), (1,0), (1,2), (1,4), (1,6), (2,1), (2,3), (2,5), (2,7) ] # All red pieces at bottom. # STARTING_RED_POSITIONS
-        print("rpl ----- ", self.red_piece_list)
-        self.black_piece_list = [ (7,0), (7,2), (7,4), (7,6), (6,1), (6,3), (6,5), (6,7), (5,0), (5,2), (5,4), (5,6) ] # All black pieces at top. # STARTING_BLACK_POSITIONS
+        self.red_piece_list = copy.deepcopy(STARTING_RED_POSITIONS) # All red pieces at bottom. # STARTING_RED_POSITIONS
+        self.black_piece_list = copy.deepcopy(STARTING_BLACK_POSITIONS) # All black pieces at top. # STARTING_BLACK_POSITIONS
         self.red_piece_potential_move_list = [] # No potential red moves at init.
         self.black_piece_potential_move_list = [] # No potential black moves at init.
+        self.black_pieces_to_remove_list = [] # Used to remove black pieces when a red piece does a jump.
+        self.red_pieces_to_remove_list = [] # Used to remove red pieces when a black piece does a jump
         print("GameState init completed")
 
     # These are getter functions used to get private variables such as self.__rows.
@@ -59,36 +60,74 @@ class GameState:
             print("DOING ILLEGAL MOVE")
             return
 
-        print("do_move player is ", self.__player)
+        # Used to determine the action direction the move took.
+        action_taken = ( new_pos[0] - self.selected_piece[0],
+                         new_pos[1] - self.selected_piece[1])
+
+        # If positive row action, action_direction_row is 1.
+        if action_taken[0] < 0:
+            action_direction_row = -1
+        else:
+            action_direction_row = 1
+
+        # If positive column action, action_direction_col is 1.
+        if action_taken[1] < 0:
+            action_direction_col = -1
+        else:
+            action_direction_col = 1
+
+        # Used to remove a black piece off a board after a jump.
+        action_direction = (action_direction_row, action_direction_col)
+        
+        print("action_taken is ", action_taken)
+        # print("do_move player is ", self.__player)
 
         # If the player is red then execute his move.
         if (self.__player == 0):
-            print("red piece list is ", self.red_piece_list)
+            # If a jump was executed, removed all elements jumped.
+            for piece in self.black_pieces_to_remove_list:
+                print("piece[0] value is", piece[0])
+                print("piece[1] value is", piece[1])
+                if piece[1] == action_direction:
+                    self.black_piece_list.remove(piece[0]) # Remove from board.
+                
+            self.black_pieces_to_remove_list = [] # Reinitialize list.
+                
+            # print("red piece list is ", self.red_piece_list)
             piece_index = self.red_piece_list.index(self.selected_piece)
-            print("index is ", piece_index)
             self.red_piece_list[piece_index] = new_pos
             self.red_piece_potential_move_list = []
 
         # If the player is black then execute his move.
         if (self.__player == 1):
+            # If a jump was executed, removed all elements jumped.
+            for piece in self.red_pieces_to_remove_list:
+                print("piece[0] value is", piece[0])
+                print("piece[1] value is", piece[1])
+                if piece[1] == action_direction:
+                    self.red_piece_list.remove(piece[0]) # Remove from board.
+                
+            self.black_pieces_to_remove_list = [] # Reinitialize list.
+            
             piece_index = self.black_piece_list.index(self.selected_piece)
-            print("index is ", piece_index)
             self.black_piece_list[piece_index] = new_pos
             self.black_piece_potential_move_list = []
 
         # Swap players so the next player gets the turn.
         self.__player = self.opponent(self.__player)
 
-
+    
     # When a player selects a piece, this function will highlight all the potential moves around it.
     def highlight_potential_moves(self, tile):
         # We don't don't want multiple red/black potential pieces on board, so reinitialize.
+        print("-- HIGHLIGHT")
         self.red_piece_potential_move_list = [] 
         self.black_piece_potential_move_list = []
 
-        print("highlight_pm player is ", self.__player)
+        #print("highlight_pm player is ", self.__player)
 
         # Grab potential_moves depending on the player.
+        # Red piece player
         if (self.__player == 0):
             # If the tile pressed isn't red, then return.
             if tile not in self.red_piece_list:
@@ -98,12 +137,37 @@ class GameState:
 
             # Loop through all legal red actions to add them as potential moves.
             for action in LEGAL_RED_ACTIONS:
+                print("-------- action")
                 # The new postion of the piece.
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
+
+                # If the temp location is on a black piece, check if jump exists.
+                if temp_piece in self.black_piece_list:
+                    # The possible jump column will change depending on the action taken.
+                    # possible jump row will remain the same.
+                    possible_jump_row = temp_piece[0] + action[0]
+                    print("temp_piece is ", temp_piece)
+                    print("action is ", action)
+                    
+                    if action[1] == -1:
+                        possible_jump_col = temp_piece[0] + (action[1] - 1)
+                    else:
+                        possible_jump_col = temp_piece[0] + (action[1] + 1)
+
+                    possible_jump = (possible_jump_row, possible_jump_col)
+                    print("possible jump is ", possible_jump)
+                    if self.is_legal(possible_jump):
+                        print("jump is legal")
+                        self.red_piece_potential_move_list.append(possible_jump)
+                        self.black_pieces_to_remove_list.append( (temp_piece, action))
+                        continue
+
+                # The temp_piece is now added to list.
                 self.red_piece_potential_move_list.append(temp_piece)
 
+        # Black piece player
         if (self.__player == 1):
             # If the tile pressed isn't black, then return.
             if tile not in self.black_piece_list:
@@ -117,4 +181,42 @@ class GameState:
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
+
+                # If the temp location is on a black piece, check if jump exists.
+                if temp_piece in self.red_piece_list:
+                    # The possible jump column will change depending on the action taken.
+                    # possible jump row will remain the same.
+                    possible_jump_row = temp_piece[0] + action[0]
+                    print("temp_piece is ", temp_piece)
+                    print("action is ", action)
+                    
+                    if action[1] == -1:
+                        possible_jump_col = temp_piece[0] + (action[1] + 1)
+                    else:
+                        possible_jump_col = temp_piece[0] + (action[1] + 1)
+
+                    
+
+                    possible_jump = (possible_jump_row, possible_jump_col)
+                    print("possible jump is ", possible_jump)
+                    if self.is_legal(possible_jump):
+                        print("jump is legal")
+                        self.black_piece_potential_move_list.append(possible_jump)
+                        self.red_pieces_to_remove_list.append( (temp_piece, action))
+                        continue
+                
                 self.black_piece_potential_move_list.append(temp_piece)
+
+        # This will later be used to determine the winner. Should contain something like
+        # black_piece_list.length == 0, the red player winner and vice versa.
+        def winner(self):
+            print("A winner is you!")
+
+        # The Heuristic will be put in this function.
+        def eval(self, player):
+            print("Heuristic calucated")
+
+# This will later will be used to implement alphabeta.
+class Player_AlphaBeta:
+    def __init__(self):
+        print("init")
