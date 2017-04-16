@@ -88,6 +88,8 @@ class GameState:
             for piece in self.black_pieces_to_remove_list:
                 print("piece[0] value is", piece[0])
                 print("piece[1] value is", piece[1])
+                # If the piece's action to get there is the same as we used to get here
+                # then remove it.
                 if piece[1] == action_direction:
                     self.black_piece_list.remove(piece[0]) # Remove from board.
                 
@@ -104,6 +106,8 @@ class GameState:
             for piece in self.red_pieces_to_remove_list:
                 print("piece[0] value is", piece[0])
                 print("piece[1] value is", piece[1])
+                # If the piece's action to get there is the same as we used to get here
+                # then remove it.
                 if piece[1] == action_direction:
                     self.red_piece_list.remove(piece[0]) # Remove from board.
                 
@@ -153,17 +157,23 @@ class GameState:
                     # The possible jump column will change depending on the action taken.
                     # possible jump row will remain the same.
                     possible_jump_row = temp_piece[0] + action[0]
-                    
+
+                    # I'm 85% sure this if statement is not needed at all but I haven't tested
+                    # without it yet so it's left in for now
                     if action[1] == -1:
                         possible_jump_col = temp_piece[1] + action[1]
                     else:
                         possible_jump_col = temp_piece[1] + action[1]
 
+                    # Where we'll be jumping to if the spot is legal.
                     possible_jump = (possible_jump_row, possible_jump_col)
                     print("possible jump is ", possible_jump)
                     if self.is_legal(possible_jump):
                         print("jump is legal")
+                        # It's now a potential move
                         self.red_piece_potential_move_list.append(possible_jump)
+                        
+                        # We remove the jumped piece by using this list.
                         self.black_pieces_to_remove_list.append( (temp_piece, action))
                     continue
 
@@ -193,19 +203,24 @@ class GameState:
                     # The possible jump column will change depending on the action taken.
                     # possible jump row will remain the same.
                     possible_jump_row = temp_piece[0] + action[0]
-                    
+
+                    # I'm 85% sure this if statement is not needed at all but I haven't tested
+                    # without it yet so it's left in for now
                     if action[1] == -1:
                         possible_jump_col = temp_piece[1] + action[1]
                     else:
                         possible_jump_col = temp_piece[1] + action[1]
-                    
+
+                    # Where we'll be jumping to if the spot is legal.
                     possible_jump = (possible_jump_row, possible_jump_col)
                     print("possible jump is ", possible_jump)
                     if self.is_legal(possible_jump):
                         print("jump is legal")
+                        # It's now a potential move
                         self.black_piece_potential_move_list.append(possible_jump)
-                        self.red_pieces_to_remove_list.append( (temp_piece, action))
 
+                        # We remove the jumped piece by using this list.
+                        self.red_pieces_to_remove_list.append( (temp_piece, action))
                     continue
                 
                 self.black_piece_potential_move_list.append(temp_piece)
