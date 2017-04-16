@@ -107,7 +107,7 @@ class GameState:
                 if piece[1] == action_direction:
                     self.red_piece_list.remove(piece[0]) # Remove from board.
                 
-            self.black_pieces_to_remove_list = [] # Reinitialize list.
+            self.red_pieces_to_remove_list = [] # Reinitialize list.
             
             piece_index = self.black_piece_list.index(self.selected_piece)
             self.black_piece_list[piece_index] = new_pos
@@ -123,6 +123,8 @@ class GameState:
         print("-- HIGHLIGHT")
         self.red_piece_potential_move_list = [] 
         self.black_piece_potential_move_list = []
+        self.red_pieces_to_remove_list = []
+        self.black_pieces_to_remove_list = []
 
         #print("highlight_pm player is ", self.__player)
 
@@ -139,22 +141,23 @@ class GameState:
             for action in LEGAL_RED_ACTIONS:
                 print("-------- action")
                 # The new postion of the piece.
+                print("tile is ", tile)
+                print("action is ", action)
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
+                print("temp_piece is ", temp_piece)
 
                 # If the temp location is on a black piece, check if jump exists.
                 if temp_piece in self.black_piece_list:
                     # The possible jump column will change depending on the action taken.
                     # possible jump row will remain the same.
                     possible_jump_row = temp_piece[0] + action[0]
-                    print("temp_piece is ", temp_piece)
-                    print("action is ", action)
                     
                     if action[1] == -1:
-                        possible_jump_col = temp_piece[0] + (action[1] - 1)
+                        possible_jump_col = temp_piece[1] + action[1]
                     else:
-                        possible_jump_col = temp_piece[0] + (action[1] + 1)
+                        possible_jump_col = temp_piece[1] + action[1]
 
                     possible_jump = (possible_jump_row, possible_jump_col)
                     print("possible jump is ", possible_jump)
@@ -162,7 +165,7 @@ class GameState:
                         print("jump is legal")
                         self.red_piece_potential_move_list.append(possible_jump)
                         self.black_pieces_to_remove_list.append( (temp_piece, action))
-                        continue
+                    continue
 
                 # The temp_piece is now added to list.
                 self.red_piece_potential_move_list.append(temp_piece)
@@ -178,32 +181,32 @@ class GameState:
             # Loop through all legal black actions to add them as potential moves.
             for action in LEGAL_BLACK_ACTIONS:
                 # The new postion of the piece.
+                print("tile is ", tile)
+                print("action is ", action)
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
+                print("temp_piece is ", temp_piece)
 
                 # If the temp location is on a black piece, check if jump exists.
                 if temp_piece in self.red_piece_list:
                     # The possible jump column will change depending on the action taken.
                     # possible jump row will remain the same.
                     possible_jump_row = temp_piece[0] + action[0]
-                    print("temp_piece is ", temp_piece)
-                    print("action is ", action)
                     
                     if action[1] == -1:
-                        possible_jump_col = temp_piece[0] + (action[1] + 1)
+                        possible_jump_col = temp_piece[1] + action[1]
                     else:
-                        possible_jump_col = temp_piece[0] + (action[1] + 1)
-
+                        possible_jump_col = temp_piece[1] + action[1]
                     
-
                     possible_jump = (possible_jump_row, possible_jump_col)
                     print("possible jump is ", possible_jump)
                     if self.is_legal(possible_jump):
                         print("jump is legal")
                         self.black_piece_potential_move_list.append(possible_jump)
                         self.red_pieces_to_remove_list.append( (temp_piece, action))
-                        continue
+
+                    continue
                 
                 self.black_piece_potential_move_list.append(temp_piece)
 
