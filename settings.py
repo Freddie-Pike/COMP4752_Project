@@ -5,6 +5,7 @@ RED         = (255,  78,  78)
 YELLOW      = (255, 255,   0)
 BG_COLOR_1  = (126,  87,  78) # Background colour 1
 BG_COLOR_2  = (237, 221, 204) # Background colour 2
+GOLD        = (238, 232, 170) # The King colour trim.
 
 # Game Settings
 FPS = 30
@@ -15,11 +16,18 @@ TILESIZE  = 80 # used to draw the board.
 STARTING_RED_POSITIONS = [(0,1), (0,3), (0,5), (0,7), (1,0), (1,2), (1,4), (1,6), (2,1), (2,3), (2,5), (2,7) ]
 STARTING_BLACK_POSITIONS = [ (7,0), (7,2), (7,4), (7,6), (6,1), (6,3), (6,5), (6,7), (5,0), (5,2), (5,4), (5,6) ]
 
+# Lists containing positions where red/black pieces can become king
+RED_CAN_BECOME_KING = [(7,0), (7,2), (7,4), (7,6)]
+BLACK_CAN_BECOME_KING = [(0,1), (0,3), (0,5), (0,7)]
+
 # All the legal actions a red piece can do.
 LEGAL_RED_ACTIONS = [ (1, -1), (1, 1) ]
 
 # All the legal actions a black piece can do.                        
 LEGAL_BLACK_ACTIONS = [ (-1, 1), (-1, -1) ]
+
+# All the legal actions a red/black king piece can do
+LEGAL_KING_ACTIONS = [(1, -1), (1, 1), (-1, 1), (-1, -1)]
 
 # Checkers Settings. Only PIECEPAD, BOARD_ROWS and BOARD_COLS are used right now for 
 # graphics stuff. Other settings will be to actual make it a game later.
@@ -41,3 +49,23 @@ RED_CAN_JUMP_POSITION_B = [(7,0), (3,4)]
 # red piece moves to the left or right.
 BLACK_CAN_JUMP_POSITION_R = [(0,1), (2,3)]
 BLACK_CAN_JUMP_POSITION_B = [(7,0), (4,3)]
+
+# Positions where red can jump 2 times.
+RED_CAN_JUMPX2_POSITION_R = [(0,1), (0,3)]
+RED_CAN_JUMPX2_POSITION_B = [(7,0), (1,4), (3,4), (3,6)]
+
+# Positions where red can jump 3 times.
+RED_CAN_JUMPX3_POSITION_R = [(0,1), (0,3)]
+RED_CAN_JUMPX3_POSITION_B = [(7,0), (1,4), (3,4), (5,4)]
+
+# Positions where red can become king
+RED_CAN_BECOME_KING_R = [(6,1), (6,3), (6,5), (6,7)]
+RED_CAN_BECOME_KING_B = [(5,2)]
+RED_CAN_BECOME_KING_KING_LIST_R = [(6,1), (6,3)]
+
+# Positions where black can become king
+BLACK_CAN_BECOME_KING_R = [(2,3)]
+BLACK_CAN_BECOME_KING_B = [(1,0), (1,2), (1,4), (1,6)]
+BLACK_CAN_BECOME_KING_KING_LIST_B = [(1,0), (1,2)]
+
+
