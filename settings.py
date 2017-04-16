@@ -30,3 +30,14 @@ DRAW        = 3
 BOARD_ROWS  = 8
 BOARD_COLS  = 8
 PIECEPAD    = 5
+
+# A list of Arrays that have starting positions for debugging. Insert them into the init function red_piece_list and black_piece_list to test them out.
+
+# This defines a state in which a red piece can jump over a black piece.
+RED_CAN_JUMP_POSITION_R = [(0,1), (2,3)]
+RED_CAN_JUMP_POSITION_B = [(7,0), (3,4)]
+
+# This defines a state in which a black piece can jump over a red piece after the (2,3) 
+# red piece moves to the left or right.
+BLACK_CAN_JUMP_POSITION_R = [(0,1), (2,3)]
+BLACK_CAN_JUMP_POSITION_B = [(7,0), (4,3)]
