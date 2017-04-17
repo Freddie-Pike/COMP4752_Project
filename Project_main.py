@@ -49,6 +49,7 @@ class Checkers:
 
     # This will draw everything on the screen.
     def draw(self):
+        # Add another parameter for king color.
         self.draw_board() # Draw the basic checkerboard for the background.
         self.draw_piece_list(self.screen, self.display_state.red_piece_list, RED, 2) # Draw all the red pieces.
         self.draw_piece_list(self.screen, self.display_state.black_piece_list, BLACK, 2) # Draw all the black pieces.
@@ -85,7 +86,12 @@ class Checkers:
         # For every piece in given list, draw a piece at that row and column.
         for piece in piece_list:
             row, col = self.display_state.rows() - 1 - piece[0], piece[1]
-            pg.draw.circle(surface, color, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD)
+            
+            if (piece in self.display_state.red_king_piece_list) or (piece in self.display_state.black_king_piece_list):
+                pg.draw.circle(surface, color, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD)
+                pg.draw.circle(surface, GOLD, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD, border)
+            else:
+                pg.draw.circle(surface, color, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD)
 
     # reset the game to a the default state board
     def reset(self):
@@ -176,4 +182,4 @@ game_object = Checkers()
 # This is the "game loop" of the program, it is an infinite loop that runs the game.
 while True:
     game_object.update()
-        
+                
