@@ -7,13 +7,13 @@ class GameState:
         self.__rows  = rows         # number of rows in the board
         self.__cols = cols          # number of columns in the board
         self.__pieces = [0]*cols    # __pieces[c] = number of pieces in a column c
-        self.__player = 1           # the current player to move, 0 = Player One, 1 = Player Two
+        self.__player = 0           # the current player to move, 0 = Player One, 1 = Player Two
         self.__board   = [[PLAYER_NONE]*cols for r in range(rows)]
 
         # Initializes all the variables that help with putting and moving pieces.
         self.selected_piece = (-1, -1) # Used for highlighting potential moves.
-        self.red_piece_list = copy.deepcopy(BLACK_CAN_BECOME_KING_R) # All red pieces at bottom. # STARTING_RED_POSITIONS
-        self.black_piece_list = copy.deepcopy(BLACK_CAN_BECOME_KING_B) # All black pieces at top. # STARTING_BLACK_POSITIONS
+        self.red_piece_list = copy.deepcopy(STARTING_RED_POSITIONS) # All red pieces at bottom. # STARTING_RED_POSITIONS
+        self.black_piece_list = copy.deepcopy(STARTING_BLACK_POSITIONS) # All black pieces at top. # STARTING_BLACK_POSITIONS
 
         # List of all kings on the board
         self.red_king_piece_list = [] # copy.deepcopy(RED_CAN_BECOME_KING_KING_LIST_R)
@@ -83,40 +83,30 @@ class GameState:
 
         # Used to remove a black piece off a board after a jump.
         action_direction = (action_direction_row, action_direction_col)
-        
-        print("action_taken is ", action_taken)
-        # print("do_move player is ", self.__player)
 
         # If the player is red then execute his move.
         if (self.__player == 0):
             # If a jump was executed, removed all elements jumped.
             for piece in self.black_pieces_to_remove_list:
-                print("piece[0] value is", piece[0])
-                print("piece[1] value is", piece[1])
                 # If the piece's action to get there is the same as we used to get here
                 # then remove it.
                 if piece[1] == action_direction:
                     self.black_piece_list.remove(piece[0]) # Remove from board.
-                
             self.black_pieces_to_remove_list = [] # Reinitialize list.
-                
-            # print("red piece list is ", self.red_piece_list)
+
+            # Grab index of selected tile.    
             piece_index = self.red_piece_list.index(self.selected_piece)
 
             # If piece is a king, must update it's location in red_king_piece_list.
             if self.red_piece_list[piece_index] in self.red_king_piece_list:
-                print("A king was moved, update neccessary")
                 king_piece_index = self.red_king_piece_list.index(self.selected_piece)
                 self.red_king_piece_list[king_piece_index] = new_pos
 
             # If piece is about to become a king, then add it to the list.
             if new_pos in RED_CAN_BECOME_KING:
-                print("--- KING ME")
                 # We don't want duplicates.
                 if new_pos not in self.red_king_piece_list:
                     self.red_king_piece_list.append(new_pos)
-                    print("new king")
-            print("red king list is ", self.red_king_piece_list)
                 
             self.red_piece_list[piece_index] = new_pos
             self.red_piece_potential_move_list = []
@@ -125,31 +115,25 @@ class GameState:
         if (self.__player == 1):
             # If a jump was executed, removed all elements jumped.
             for piece in self.red_pieces_to_remove_list:
-                print("piece[0] value is", piece[0])
-                print("piece[1] value is", piece[1])
                 # If the piece's action to get there is the same as we used to get here
                 # then remove it.
                 if piece[1] == action_direction:
-                    self.red_piece_list.remove(piece[0]) # Remove from board.
-                
+                    self.red_piece_list.remove(piece[0]) # Remove from board.                
             self.red_pieces_to_remove_list = [] # Reinitialize list.
             
+            # Grab index of selected tile
             piece_index = self.black_piece_list.index(self.selected_piece)
 
             # If piece is a king, must update it's location in red_king_piece_list.
             if self.black_piece_list[piece_index] in self.black_king_piece_list:
-                print("A king was moved, update neccessary")
                 king_piece_index = self.black_king_piece_list.index(self.selected_piece)
                 self.black_king_piece_list[king_piece_index] = new_pos
 
             # If piece is about to become a king, then add it to the list.
             if new_pos in BLACK_CAN_BECOME_KING:
-                print("--- KING ME")
                 # We don't want duplicates.
                 if new_pos not in self.black_king_piece_list:
                     self.black_king_piece_list.append(new_pos)
-                    print("new king")
-            print("red king list is ", self.red_king_piece_list)
             
             self.black_piece_list[piece_index] = new_pos
             self.black_piece_potential_move_list = []
@@ -161,13 +145,11 @@ class GameState:
     # When a player selects a piece, this function will highlight all the potential moves around it.
     def highlight_potential_moves(self, tile):
         # We don't don't want multiple red/black potential pieces on board, so reinitialize.
-        print("---------------------------------------- HIGHLIGHT")
+        print("----------------------------------- HIGHLIGHT ----------------------------------- ")
         self.red_piece_potential_move_list = [] 
         self.black_piece_potential_move_list = []
         self.red_pieces_to_remove_list = []
         self.black_pieces_to_remove_list = []
-
-        print("highlight_pm player is ", self.__player)
 
         # Grab potential_moves depending on the player.
         # Red piece player
@@ -179,7 +161,6 @@ class GameState:
 
             self.selected_piece = tile # Used to possibly move to this postion later.
 
-        
             # Grab all legal actions and put it in the legal action list.
             action_list = []
 
@@ -195,45 +176,30 @@ class GameState:
             for action in action_list:
                 print("-------- action")
                 # The new postion of the piece.
-                print("tile is ", tile)
-                print("action is ", action)
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
-                print("temp_piece is ", temp_piece)
-
-                # new_action = (action[0] * 2, action[1] * 2)
 
                 # If the temp location is on a black piece, check if jump exists.
                 if temp_piece in self.black_piece_list:
-                    
                     # The possible jump column will change depending on the action taken.
                     # possible jump row will remain the same.
                     possible_jump_row = temp_piece[0] + action[0]
                     possible_jump_col = temp_piece[1] + action[1]
 
-                    
                     # Where we'll be jumping to if the spot is legal.
                     possible_jump = (possible_jump_row, possible_jump_col)
-                    print("possible jump is ", possible_jump)
                     if self.is_legal(possible_jump):
-                        
-                        print("jump is legal")
-                        # It's now a potential move
+                        # It's now a potential move.
                         self.red_piece_potential_move_list.append(possible_jump)
                         
                         # We remove the jumped piece by using this list.
                         self.black_pieces_to_remove_list.append( (temp_piece, action))
-
-                        # Add new potential jumps to list.
-                        # new_action_1 = (action[0] * 3, action[1] * 3)
-                        # new_action_2 = (action[0] * 3, action[1])
-                        # action_list.append(new_action_1)
-                        # action_list.append(new_action_2)
                     continue
                 else:
                     # The temp_piece is now added to list.
-                    self.red_piece_potential_move_list.append(temp_piece)
+                    if self.is_legal(temp_piece):
+                        self.red_piece_potential_move_list.append(temp_piece)
 
         # Black piece player
         if (self.__player == 1):
@@ -257,14 +223,10 @@ class GameState:
             # Loop through all legal black actions to add them as potential moves.
             for action in action_list:
                 # The new postion of the piece.
-                print("tile is ", tile)
-                print("action is ", action)
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
-                print("temp_piece is ", temp_piece)
                 new_action = (action[0] + action[0], action[1] + action[1])
-                print("new_action is ", new_action)
 
                 # If the temp location is on a black piece, check if jump exists.
                 if temp_piece in self.red_piece_list:
@@ -275,9 +237,7 @@ class GameState:
 
                     # Where we'll be jumping to if the spot is legal.
                     possible_jump = (possible_jump_row, possible_jump_col)
-                    print("possible jump is ", possible_jump)
                     if self.is_legal(possible_jump):
-                        print("jump is legal")
                         # It's now a potential move
                         self.black_piece_potential_move_list.append(possible_jump)
 
@@ -286,7 +246,8 @@ class GameState:
                     continue
                 else:
                     # The temp_piece is now added to list.
-                    self.black_piece_potential_move_list.append(temp_piece)
+                    if self.is_legal(temp_piece):
+                        self.black_piece_potential_move_list.append(temp_piece)
 
         # This will later be used to determine the winner. Should contain something like
         # black_piece_list.length == 0, the red player winner and vice versa.
