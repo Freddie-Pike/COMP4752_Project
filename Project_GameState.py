@@ -12,8 +12,8 @@ class GameState:
 
         # Initializes all the variables that help with putting and moving pieces.
         self.selected_piece = (-1, -1) # Used for highlighting potential moves.
-        self.red_piece_list = copy.deepcopy(STARTING_RED_POSITIONS) # All red pieces at bottom. # STARTING_RED_POSITIONS
-        self.black_piece_list = copy.deepcopy(STARTING_BLACK_POSITIONS) # All black pieces at top. # STARTING_BLACK_POSITIONS
+        self.red_piece_list = copy.deepcopy(RED_CAN_JUMPX3_POSITION_R) # All red pieces at bottom. # STARTING_RED_POSITIONS
+        self.black_piece_list = copy.deepcopy(RED_CAN_JUMPX3_POSITION_B) # All black pieces at top. # STARTING_BLACK_POSITIONS
 
         # List of all kings on the board
         self.red_king_piece_list = [] # copy.deepcopy(RED_CAN_BECOME_KING_KING_LIST_R)
@@ -23,6 +23,8 @@ class GameState:
         self.black_piece_potential_move_list = [] # No potential black moves at init.
         self.black_pieces_to_remove_list = [] # Used to remove black pieces when a red piece does a jump.
         self.red_pieces_to_remove_list = [] # Used to remove red pieces when a black piece does a jump
+
+        self.recursion_limit = 0 # Used for getting multiple jumps
         print("GameState init completed")
 
     # These are getter functions used to get private variables such as self.__rows.
@@ -141,25 +143,28 @@ class GameState:
         # Swap players so the next player gets the turn.
         self.__player = self.opponent(self.__player)
 
-    
-    # When a player selects a piece, this function will highlight all the potential moves around it.
-    def highlight_potential_moves(self, tile):
-        # We don't don't want multiple red/black potential pieces on board, so reinitialize.
-        print("----------------------------------- HIGHLIGHT ----------------------------------- ")
         self.red_piece_potential_move_list = [] 
         self.black_piece_potential_move_list = []
         self.red_pieces_to_remove_list = []
         self.black_pieces_to_remove_list = []
 
+    
+    # When a player selects a piece, this function will highlight all the potential moves around it.
+    def highlight_potential_moves(self, tile):
+        # We don't don't want multiple red/black potential pieces on board, so reinitialize.
+        print("----------------------------------- HIGHLIGHT ----------------------------------- ")
+        self.recursion_limit += 1
+
         # Grab potential_moves depending on the player.
         # Red piece player
         if (self.__player == 0):
             # If the tile pressed isn't red, then return.
-            if tile not in self.red_piece_list:
+            if (tile not in self.red_piece_list) and (self.recursion_limit == 1):
                 print("Didn't click on red tile")
                 return
 
-            self.selected_piece = tile # Used to possibly move to this postion later.
+            if (self.recursion_limit == 1):
+                self.selected_piece = tile # Used to possibly move to this postion later.
 
             # Grab all legal actions and put it in the legal action list.
             action_list = []
@@ -195,10 +200,12 @@ class GameState:
                         
                         # We remove the jumped piece by using this list.
                         self.black_pieces_to_remove_list.append( (temp_piece, action))
+
+                        self.highlight_potential_moves(possible_jump)
                     continue
                 else:
                     # The temp_piece is now added to list.
-                    if self.is_legal(temp_piece):
+                    if (self.is_legal(temp_piece)) and (self.recursion_limit == 1):
                         self.red_piece_potential_move_list.append(temp_piece)
 
         # Black piece player
@@ -248,6 +255,9 @@ class GameState:
                     # The temp_piece is now added to list.
                     if self.is_legal(temp_piece):
                         self.black_piece_potential_move_list.append(temp_piece)
+
+        print("End of file")
+        self.recursion_limit = 0
 
         # This will later be used to determine the winner. Should contain something like
         # black_piece_list.length == 0, the red player winner and vice versa.
