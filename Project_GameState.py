@@ -12,17 +12,18 @@ class GameState:
 
         # Initializes all the variables that help with putting and moving pieces.
         self.selected_piece = (-1, -1) # Used for highlighting potential moves.
-        self.red_piece_list = copy.deepcopy(RED_CAN_JUMPX3_POSITION_R) # All red pieces at bottom. # STARTING_RED_POSITIONS
-        self.black_piece_list = copy.deepcopy(RED_CAN_JUMPX3_POSITION_B) # All black pieces at top. # STARTING_BLACK_POSITIONS
+        self.red_piece_list = copy.deepcopy(RED_CAN_JUMP_CIRCLE_POSITION_R) # All red pieces at bottom. # STARTING_RED_POSITIONS
+        self.black_piece_list = copy.deepcopy(RED_CAN_JUMP_CIRCLE_POSITION_B) # All black pieces at top. # STARTING_BLACK_POSITIONS
 
         # List of all kings on the board
-        self.red_king_piece_list = [] # copy.deepcopy(RED_CAN_BECOME_KING_KING_LIST_R)
+        self.red_king_piece_list =  copy.deepcopy(RED_CAN_JUMP_CIRCLE_POSITION_KING_LIST_R)
         self.black_king_piece_list = [] # copy.deepcopy(BLACK_CAN_BECOME_KING_KING_LIST_B)
         
         self.red_piece_potential_move_list = [] # No potential red moves at init.
         self.black_piece_potential_move_list = [] # No potential black moves at init.
         self.black_pieces_to_remove_list = [] # Used to remove black pieces when a red piece does a jump.
         self.red_pieces_to_remove_list = [] # Used to remove red pieces when a black piece does a jump
+        self.red_piece_jumping_list = [] # Used for removing pieces.
 
         self.recursion_limit = 0 # Used for getting multiple jumps
         print("GameState init completed")
@@ -88,12 +89,30 @@ class GameState:
 
         # If the player is red then execute his move.
         if (self.__player == 0):
+            for index in range(len(self.red_piece_jumping_list)):
+                print("red_piece_jumping_list[", index, "] is ", self.red_piece_jumping_list[index])
+            print("++++++++++++++++")
+            for index in range(len(self.black_pieces_to_remove_list)):
+                print("black_pieces_to_remove_list[", index, "] is ", self.black_pieces_to_remove_list[index])
+
+            remove_piece_range = 0
+            for item in self.red_piece_jumping_list:
+                if item[0] == new_pos:
+                    print("IT WORKS MAN! IT TOTALLY WORK!")
+                    print("item is ", item)
+                    remove_piece_range = item[2]
+
+            print("remove_piece_range is ", remove_piece_range)
+            # rp_index = self.red_piece_jumping_list.index(new_pos)
+            
+            
             # If a jump was executed, removed all elements jumped.
-            for piece in self.black_pieces_to_remove_list:
+            for i in range(remove_piece_range):
                 # If the piece's action to get there is the same as we used to get here
                 # then remove it.
-                if piece[1] == action_direction:
-                    self.black_piece_list.remove(piece[0]) # Remove from board.
+                # self.black_piece_list.remove(self.red_piece_jumping_list[0]) # Remove from board.
+                print("self.red_piece_jumping_list[",i,"][1] is ", self.red_piece_jumping_list[i][1])
+                self.black_piece_list.remove(self.red_piece_jumping_list[i][1])
             self.black_pieces_to_remove_list = [] # Reinitialize list.
 
             # Grab index of selected tile.    
@@ -142,18 +161,22 @@ class GameState:
 
         # Swap players so the next player gets the turn.
         self.__player = self.opponent(self.__player)
-
-        self.red_piece_potential_move_list = [] 
-        self.black_piece_potential_move_list = []
-        self.red_pieces_to_remove_list = []
-        self.black_pieces_to_remove_list = []
-
     
     # When a player selects a piece, this function will highlight all the potential moves around it.
     def highlight_potential_moves(self, tile):
         # We don't don't want multiple red/black potential pieces on board, so reinitialize.
         print("----------------------------------- HIGHLIGHT ----------------------------------- ")
+        if (self.recursion_limit == 0):
+            self.red_piece_potential_move_list = [] 
+            self.black_piece_potential_move_list = []
+            self.red_pieces_to_remove_list = []
+            self.black_pieces_to_remove_list = []
+            self.red_piece_jumping_list = []
+            self.is_king = False
+            print("++++++++++++++++++++++++ FIRST ++++++++++++++++++++++++")
+            
         self.recursion_limit += 1
+        print("recursion_limit is ", self.recursion_limit)
 
         # Grab potential_moves depending on the player.
         # Red piece player
@@ -170,7 +193,9 @@ class GameState:
             action_list = []
 
             # If the tile is a king then grab all king actions, if not then grab usual red piece actions.
+            print("is_king is ", self.is_king)
             if tile in self.red_king_piece_list:
+                print("is king")
                 for action in LEGAL_KING_ACTIONS:
                     action_list.append(action)
             else:
@@ -184,6 +209,8 @@ class GameState:
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
                 temp_piece = (new_row, new_col)
+                print("action is ", action)
+                print("temp_piece is ", temp_piece)
 
                 # If the temp location is on a black piece, check if jump exists.
                 if temp_piece in self.black_piece_list:
@@ -194,18 +221,24 @@ class GameState:
 
                     # Where we'll be jumping to if the spot is legal.
                     possible_jump = (possible_jump_row, possible_jump_col)
+                    print("possible_jump is ", possible_jump)
                     if self.is_legal(possible_jump):
+                        # We remove the jumped piece by using this list.
+                        self.black_pieces_to_remove_list.append((temp_piece, action))
+                        
                         # It's now a potential move.
                         self.red_piece_potential_move_list.append(possible_jump)
-                        
-                        # We remove the jumped piece by using this list.
-                        self.black_pieces_to_remove_list.append( (temp_piece, action))
 
+                        # Add possible move, and current pieces to remove.
+                        self.red_piece_jumping_list.append((possible_jump, temp_piece, self.recursion_limit))
+
+                        # Recursively call the function itself
                         self.highlight_potential_moves(possible_jump)
                     continue
                 else:
                     # The temp_piece is now added to list.
                     if (self.is_legal(temp_piece)) and (self.recursion_limit == 1):
+                        print("adding temp_piece to list in else statement.")
                         self.red_piece_potential_move_list.append(temp_piece)
 
         # Black piece player
