@@ -19,7 +19,7 @@ from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
 P1Player = None
-P2Player = Project_GameState.Player_AlphaBeta(2, 0)
+P2Player = Project_GameState.Player_AlphaBeta(1, 0)
 
 # The basic Checkers class.
 class Checkers:
@@ -132,10 +132,20 @@ class Checkers:
         print("do move")
         # Check for winner and do move.
         self.winner = self.display_state.winner()
+        print("before self.display_state.red_piece_list is ", len(self.display_state.red_piece_list))
         self.display_state.do_move(move)
+        print()
+        print("after self.display_state.red_piece_list is ", len(self.display_state.red_piece_list))
+        print()
+        print("before - self.player_states[0].red_piece_list is ", len(self.player_states[0].red_piece_list))
         self.player_states[0].do_move(move)
-        print("self.player_states[0].do_move(move) is")
+        print()
+        print("after - self.player_states[0].red_piece_list is ", len(self.player_states[0].red_piece_list))
+        print()
+        print("before - self.player_states[1].red_piece_list is ", len(self.player_states[1].red_piece_list))
         self.player_states[1].do_move(move)
+        print()
+        print("after - self.player_states[1].red_piece_list is ", len(self.player_states[1].red_piece_list))
         print("MAIN DO MOVE FINISHED")
 
     # This function will do a basic move
@@ -205,7 +215,6 @@ class Checkers:
                     self.player_states[0].highlight_potential_moves(move)
                     self.player_states[1].highlight_potential_moves(move)
 
-        
 # This is the main executable part of the program.
 sys.setrecursionlimit(10000) # Can't go past 10000 recursive depth.
 
