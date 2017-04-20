@@ -16,14 +16,17 @@ class GameState:
         self.black_piece_list = copy.deepcopy(STARTING_BLACK_POSITIONS) # All black pieces at top. # STARTING_BLACK_POSITIONS
 
         # List of all kings on the board
-        self.red_king_piece_list = [] # copy.deepcopy(RED_CAN_BECOME_KING_KING_LIST_R)
+        self.red_king_piece_list = [] ##copy.deepcopy(RED_CAN_BECOME_KING_KING_LIST_R)
         self.black_king_piece_list = [] # copy.deepcopy(BLACK_CAN_BECOME_KING_KING_LIST_B)
         
         self.red_piece_potential_move_list = [] # No potential red moves at init.
         self.black_piece_potential_move_list = [] # No potential black moves at init.
         self.black_pieces_to_remove_list = [] # Used to remove black pieces when a red piece does a jump.
         self.red_pieces_to_remove_list = [] # Used to remove red pieces when a black piece does a jump
-        print("GameState init completed")
+
+        self.just_done_move = None # The move just finished,
+        self.just_deleted = None # last deleted.
+        # # print("GameState init completed")
 
     # These are getter functions used to get private variables such as self.__rows.
     def get(self, r, c):        return self.__board[r][c]   # piece type located at (r,c)
@@ -36,22 +39,22 @@ class GameState:
     def is_legal(self, move):
         # If the move is on tile with a red piece, then it's not legal.
         if move in self.red_piece_list:
-            print("move is in red piece list")
+            # # print("move is in red piece list")
             return False
 
         # If the move is on tile with a black piece, then it's not legal.
         if move in self.black_piece_list:
-            print("move is in black piece list")
+            # # print("move is in black piece list")
             return False
 
         # Check if the row position is within bounds.
         if (move[0] < 0 or move[0] >= BOARD_ROWS):
-            print("row location is out of bounds")
+            # # print("row location is out of bounds")
             return False
 
         # Check if the column position is within bounds.
         if (move[1] < 0 or move[1] >= BOARD_COLS):
-            print("column location is out of bounds")
+            # # print("column location is out of bounds")
             return False
 
         # Previously checks were false so tile must be legal.
@@ -59,15 +62,20 @@ class GameState:
 
     # This will execute a move when passed a new row/column location.
     def do_move(self, new_pos):
-        print("do_move ------------------------------------")
+        # # print("do_move ------------------------------------")
+        self.just_deleted = None
         # If the move is illegal, then return.
+        # # print("new_pos is ", new_pos)
         if not self.is_legal(new_pos):
-            print("DOING ILLEGAL MOVE")
+            # print("DOING ILLEGAL MOVE")
             return
+
 
         # Used to determine the action direction the move took.
         action_taken = ( new_pos[0] - self.selected_piece[0],
                          new_pos[1] - self.selected_piece[1])
+
+        self.just_done_move = (new_pos, self.selected_piece)
 
         # If positive row action, action_direction_row is 1.
         if action_taken[0] < 0:
@@ -92,9 +100,12 @@ class GameState:
                 # then remove it.
                 if piece[1] == action_direction:
                     self.black_piece_list.remove(piece[0]) # Remove from board.
+                    self.just_deleted = piece[0]
             self.black_pieces_to_remove_list = [] # Reinitialize list.
 
-            # Grab index of selected tile.    
+            # Grab index of selected tile.
+            # # print("self.selected_piece is ", self.selected_piece)
+            # # print("self.black_piece_list is ", self.red_piece_list)
             piece_index = self.red_piece_list.index(self.selected_piece)
 
             # If piece is a king, must update it's location in red_king_piece_list.
@@ -118,10 +129,13 @@ class GameState:
                 # If the piece's action to get there is the same as we used to get here
                 # then remove it.
                 if piece[1] == action_direction:
-                    self.red_piece_list.remove(piece[0]) # Remove from board.                
+                    self.red_piece_list.remove(piece[0]) # Remove from board.
+                    self.just_deleted = piece[0]
             self.red_pieces_to_remove_list = [] # Reinitialize list.
             
             # Grab index of selected tile
+            # # print("self.selected_piece is ", self.selected_piece)
+            # # print("self.black_piece_list is ", self.black_piece_list)
             piece_index = self.black_piece_list.index(self.selected_piece)
 
             # If piece is a king, must update it's location in red_king_piece_list.
@@ -140,23 +154,54 @@ class GameState:
 
         # Swap players so the next player gets the turn.
         self.__player = self.opponent(self.__player)
+        
+
+    # Undo the last done move in the gamestate.
+    def undo_move(self):
+        # self.just_done_move = (new_pos, self.selected_piece)
+        # If the player is red, undo the red move and pass it to black.
+        if (self.__player == 0):
+            # Remove the new postion piece and add the old position back in.
+            self.black_piece_list.remove(self.just_done_move[0])
+            self.black_piece_list.append(self.just_done_move[1])
+
+            # If we deleted a piece then put it back in.
+            if self.just_deleted != None:
+                self.red_piece_list.append(self.just_deleted)
+
+        # If the player is black, undo the red move and pass it to red.
+        elif (self.__player == 1):
+            # Remove the new postion piece and add the old position back in.
+            self.red_piece_list.remove(self.just_done_move[0])
+            self.red_piece_list.append(self.just_done_move[1])
+
+            # If we deleted a piece then put it back in.
+            if self.just_deleted != None:
+                self.black_piece_list.append(self.just_deleted)
+
+        # Give the opponent back his turn.
+        self.__player = self.opponent(self.__player)
 
     
     # When a player selects a piece, this function will highlight all the potential moves around it.
     def highlight_potential_moves(self, tile):
         # We don't don't want multiple red/black potential pieces on board, so reinitialize.
-        print("----------------------------------- HIGHLIGHT ----------------------------------- ")
+        # # print("----------------------------------- HIGHLIGHT ----------------------------------- ")
+        # # print("self.player is ", self.__player)
         self.red_piece_potential_move_list = [] 
         self.black_piece_potential_move_list = []
         self.red_pieces_to_remove_list = []
         self.black_pieces_to_remove_list = []
+        self.just_done_move = None
 
         # Grab potential_moves depending on the player.
         # Red piece player
         if (self.__player == 0):
             # If the tile pressed isn't red, then return.
+            # # print("hm - tile is ", tile)
+            # # print("hm - self.red_piece_ is ", self.red_piece_list)
             if tile not in self.red_piece_list:
-                print("Didn't click on red tile")
+                # # print("Didn't click on red tile")
                 return
 
             self.selected_piece = tile # Used to possibly move to this postion later.
@@ -174,7 +219,7 @@ class GameState:
 
             # Loop through all legal red actions to add them as potential moves.
             for action in action_list:
-                print("-------- action")
+                # # print("-------- action")
                 # The new postion of the piece.
                 new_row = tile[0] + action[0]
                 new_col = tile[1] + action[1]
@@ -205,6 +250,7 @@ class GameState:
         if (self.__player == 1):
             # If the tile pressed isn't black, then return.
             if tile not in self.black_piece_list:
+                # # print("Didn't click on black tile")
                 return
 
             self.selected_piece = tile # Used to possibly move to this postion later.
@@ -249,16 +295,129 @@ class GameState:
                     if self.is_legal(temp_piece):
                         self.black_piece_potential_move_list.append(temp_piece)
 
-        # This will later be used to determine the winner. Should contain something like
-        # black_piece_list.length == 0, the red player winner and vice versa.
-        def winner(self):
-            print("A winner is you!")
+
+    def winner(self):
+        if(len(self.black_piece_list) <= 6):
+            # # print("P1 wins!")
+            return PLAYER_ONE
+
+        elif(len(self.red_piece_list) <= 6):
+            # # print("P2 wins!")
+            return PLAYER_TWO
+
+        else: 
+            return PLAYER_NONE
 
         # The Heuristic will be put in this function.
-        def eval(self, player):
-            print("Heuristic calculated")
+    def eval(self, player):
+        # print("in eval")
+        score = 0
+        if(self.winner() == player):
+            score = 1000000
+            # # print("winning move")
+            return score
+        elif(self.winner() == ((player + 1) % 2)):
+            score = -1000000
+            # # print("losing move")
+            return score
+        else:
+            if(player == PLAYER_ONE):
+                score += ((len(self.red_piece_list) - len(self.black_piece_list)) * 100)
+                score += ((len(self.red_king_piece_list) - len(self.black_king_piece_list)) * 25)
+
+                ##for pieces in red_piece_list
+            else:
+                score += ((len(self.black_piece_list) - len(self.red_piece_list)) * 100)
+                score += ((len(self.black_king_piece_list) - len(self.red_king_piece_list)) * 25)
+            # # print("no one has won yet")
+            return score
+
 
 # This will later will be used to implement alphabeta.
 class Player_AlphaBeta:
-    def __init__(self):
-        print("init")
+
+    def __init__(self, max_depth, time_limit):
+        self.max_depth = 2      # set the max depth of search
+        self.time_limit = time_limit    # set the time limit (in milliseconds)
+        self.best_move = -1             # record the best move found so far
+        self.reset()
+        self.current_maxd=max_depth
+        
+        # # print('initailized player alpha beta')
+        # Add more class variables here as necessary (you will probably need more)
+
+    
+    # Reset all appropriate values so alphabeta can be freshly called again.
+    def reset(self):
+        self.temp_best_move = -1
+        self.best_move = -1
+        self.best_move_val = -1000000
+        self.alpha_beta_val = []
+
+    def get_move(self, state):
+        # reset the variables
+        self.reset()
+        # store the time that we started calculating this move, so we can tell how much time has passed
+        self.time_start = time.clock()
+        # store the player that we're deciding a move for and set it as a class variable
+        self.player = state.player_to_move()
+        # do your alpha beta (or ID-AB) search here
+        # # print('get move CALLED')
+        ab_value = self.alpha_beta(state, 0, -1000000, 1000000, True)
+        # return the best move computer by alpha_beta
+        return self.temp_best_move # Return the best move.
+
+    def is_terminal(self, state, depth):
+        if (self.current_maxd > 0 and depth >= self.current_maxd):
+            return True
+        return state.winner() != PLAYER_NONE
+    
+    def alpha_beta(self, state, depth, alpha, beta, max_player):
+        # If terminal then return the evaluation.
+        if (self.is_terminal(state, depth)): 
+            # print('its terminal')
+            return state.eval(self.player) 
+
+        # Look for best move if red piece.
+        if(state.player_to_move() == 0):
+            for piece in state.red_piece_list:
+                state.highlight_potential_moves(piece)
+                for move in state.red_piece_potential_move_list:
+                    state.do_move(move)
+                    val = self.alpha_beta(state, depth+1, alpha, beta, False)  
+                    state.undo_move()  # Must implement this method.
+                    if depth == 0: self.alpha_beta_val.append(val)
+                    if max_player and val > alpha:
+                        if depth == 0:
+                            self.temp_best_move = move
+                        alpha = val
+                    elif not max_player and val < beta:
+                        beta = val
+                    if alpha >= beta:
+                        break
+            return alpha if max_player else beta
+
+        # Look for best move if black piece.
+        elif(state.player_to_move() == 1):
+            for piece in state.black_piece_list:
+                state.highlight_potential_moves(piece)
+                for move in state.black_piece_potential_move_list:
+                    state.do_move(move)
+                    val = self.alpha_beta(state, depth+1, alpha, beta, False)  
+                    state.undo_move()  # Must implement this method.
+                    if depth == 0: self.alpha_beta_val.append(val)
+                    if max_player and val > alpha:
+                        if depth == 0:
+                            self.temp_best_move = move
+                            self.temp_best_selected_piece = state.selected_piece
+                            alpha = val
+                        elif not max_player and val < beta:
+                            beta = val
+                        if alpha >= beta:
+                            break
+            # print("alpha is ", alpha)
+            # print("beta is ", beta)
+            # print("self.temp_best_move is ", self.temp_best_move)
+            # print("temp_best_selected_piece is ", self.temp_best_selected_piece)
+            return alpha if max_player else beta
+    
