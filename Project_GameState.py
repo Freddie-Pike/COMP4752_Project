@@ -382,9 +382,7 @@ class Player_AlphaBeta:
         print("++++++++alpha beta value received")
         print("self.temp_best_just_done_move_B is ", self.temp_best_just_done_move_B)
         print("state.just_done_move is ", state.just_done_move)
-        if (state.player_to_move() == 1):
-            print("black")
-            return self.temp_best_move_B # Return the best black move.
+        return self.temp_best_move_B # Return the best black move.
         # elif (state.player_to_move() == 1):
 
     def is_terminal(self, state, depth):
@@ -408,8 +406,12 @@ class Player_AlphaBeta:
             for piece in state.red_piece_list:
                 # print("state.red_piece_list is ", state.red_piece_list)
                 state.highlight_potential_moves(piece)
+                sel_piece = state.selected_piece
+                rp_to_remove_list = state.red_pieces_to_remove_list
+                bp_to_remove_list = state.black_pieces_to_remove_list
                 for move in state.red_piece_potential_move_list:
-                    # print("++ rp_potential_move is ", move) 
+                    # print("++ rp_potential_move is ", move)
+                    state.selected_piece = sel_piece
                     state.do_move(move)
                     temp_jd_move = (move, state.selected_piece)
                     temp_just_deleted = state.just_deleted
@@ -418,10 +420,11 @@ class Player_AlphaBeta:
                     if depth == 0: self.alpha_beta_val.append(val)
                     if max_player and val > alpha:
                         if depth == 0:
-                            self.temp_best_move_R = move
-                            self.temp_best_selected_piece_R = state.selected_piece
-                            self.temp_best_just_done_move_R = state.just_done_move
-                            self.temp_red_pieces_to_remove_list_R = state.red_pieces_to_remove_list
+                            self.temp_best_move_B = temp_jd_move[0]
+                            self.temp_best_selected_piece_B = temp_jd_move[1]
+                            self.temp_best_just_done_move_B = temp_jd_move
+                            self.temp_red_pieces_to_remove_list_B = rp_to_remove_list
+                            self.temp_black_pieces_to_remove_list = bp_to_remove_list 
                         alpha = val
                     elif not max_player and val < beta:
                         beta = val
@@ -436,6 +439,7 @@ class Player_AlphaBeta:
                 state.highlight_potential_moves(piece)
                 sel_piece = state.selected_piece
                 rp_to_remove_list = state.red_pieces_to_remove_list
+                bp_to_remove_list = state.black_pieces_to_remove_list
                 # print("state.black_piece_list is ", state.black_piece_list)
                 for move in state.black_piece_potential_move_list:
                     # print("++ bp_potential_move is ", move)
@@ -453,6 +457,7 @@ class Player_AlphaBeta:
                             self.temp_best_selected_piece_B = temp_jd_move[1]
                             self.temp_best_just_done_move_B = temp_jd_move
                             self.temp_red_pieces_to_remove_list_B = rp_to_remove_list
+                            self.temp_black_pieces_to_remove_list = bp_to_remove_list 
                         alpha = val
                     elif not max_player and val < beta:
                         beta = val
