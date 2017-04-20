@@ -19,7 +19,7 @@ from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
 P1Player = None
-P2Player = Project_GameState.Player_AlphaBeta(1, 0)
+P2Player = Project_GameState.Player_AlphaBeta(2, 0)
 
 # The basic Checkers class.
 class Checkers:
@@ -116,17 +116,17 @@ class Checkers:
         # This if statement is used to change the selected index to the one alpha beta
         # generated when it found the best move.
         if self.players[player] != None:
-            print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move)
-            print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
-            print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list)
+            print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move_B)
+            print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece_B)
+            print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list_B)
             print("move is ", move)
-            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece
-            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
-            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece
+            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece_B
 
-            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
-            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
-            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
+            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
             
 
         print("do move")
@@ -134,6 +134,7 @@ class Checkers:
         self.winner = self.display_state.winner()
         self.display_state.do_move(move)
         self.player_states[0].do_move(move)
+        print("self.player_states[0].do_move(move) is")
         self.player_states[1].do_move(move)
         print("MAIN DO MOVE FINISHED")
 
