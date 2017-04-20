@@ -1,5 +1,6 @@
 import sys
 import pygame as pg
+import logging
 import Project_GameState
 from settings import *
 
@@ -18,12 +19,13 @@ from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
 P1Player = None
-P2Player = Project_GameState.Player_AlphaBeta(1, 2000)
+P2Player = Project_GameState.Player_AlphaBeta(1, 0)
 
 # The basic Checkers class.
 class Checkers:
     # The init function where we initalize important information about pygame and checkers.
     def __init__(self):
+        print("+INITIALIZED+")
         pg.init() # This initializes pygame, must be done.
         pg.display.set_caption(TITLE) # Sets title of the window as defined in settings.
         self.clock = pg.time.Clock() # Used to set the FPS.
@@ -105,22 +107,28 @@ class Checkers:
 
     # This will execute a move when passed a new row/column location.
     def do_move(self, move):
-        print("do_turn move is ", move)
+        print("about to do move")
         player = self.display_state.player_to_move()
+        print("do move player is ", player)
+        print("self.players[player] is ", self.players[player])
+        print("move is ", move)
 
         # This if statement is used to change the selected index to the one alpha beta
         # generated when it found the best move.
         if self.players[player] != None:
-            print("AI best move is ", self.players[player].temp_best_selected_piece)
+            print("AI temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
+            print("AI temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
             self.display_state.selected_piece =  self.players[player].temp_best_selected_piece
             self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
-            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
+            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece
 
+        print("do move")
         # Check for winner and do move.
         self.winner = self.display_state.winner()
         self.display_state.do_move(move)
         self.player_states[0].do_move(move)
         self.player_states[1].do_move(move)
+        print("MAIN DO MOVE FINISHED")
 
     # This function will do a basic move
     def do_turn(self):
@@ -130,6 +138,7 @@ class Checkers:
             player = self.display_state.player_to_move()    # get the next player to move from the state
             # print("------ ", player)
             if self.players[player] != None:        # if the current player is an AI, get its move
+                print("About to do turn")
                 self.do_move(self.players[player].get_move(self.player_states[player]))
         
             
