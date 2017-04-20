@@ -61,7 +61,7 @@ class GameState:
         return True
 
     # This will execute a move when passed a new row/column location.
-    def do_move(self, new_pos, ):
+    def do_move(self, new_pos):
         # print("new_pos is ", new_pos)
         self.just_deleted = None
         # If the move is illegal, then return.
@@ -125,7 +125,8 @@ class GameState:
         # If the player is black then execute his move.
         if (self.__player == 1):
             # print("player is 1")
-            # print("self.red_pieces_to_remove_list is ", self.red_pieces_to_remove_list)
+            print("move being made is ", new_pos)
+            print("self.red_pieces_to_remove_list is ", self.red_pieces_to_remove_list)
             # If a jump was executed, removed all elements jumped.
             for piece in self.red_pieces_to_remove_list:
                 # If the piece's action to get there is the same as we used to get here
@@ -162,7 +163,7 @@ class GameState:
         
 
     # Undo the last done move in the gamestate.
-    def undo_move(self, j_done_move):
+    def undo_move(self, j_done_move, j_deleted_move):
         # self.just_done_move = (new_pos, self.selected_piece)
         # If the player is red, undo the red move and pass it to black.
         # print("+_+_+_+_+_+ undo_move +_+_+_+_+_+")
@@ -175,8 +176,8 @@ class GameState:
             self.black_piece_list[piece_index] = j_done_move[1]
 
             # If we deleted a piece then put it back in.
-            if self.just_deleted != None:
-                self.red_piece_list.append(self.just_deleted)
+            if j_deleted_move != None:
+                self.red_piece_list.append(j_deleted_move)
 
         # If the player is black, undo the red move and pass it to red.
         elif (self.__player == 1):
@@ -188,8 +189,8 @@ class GameState:
             self.red_piece_list[piece_index] = j_done_move[1]
 
             # If we deleted a piece then put it back in.
-            if self.just_deleted != None:
-                self.black_piece_list.append(self.just_deleted)
+            if j_deleted_move != None:
+                self.black_piece_list.append(j_deleted_move)
 
         # Give the opponent back his turn.
         self.__player = self.opponent(self.__player)
@@ -411,8 +412,9 @@ class Player_AlphaBeta:
                     # print("++ rp_potential_move is ", move) 
                     state.do_move(move)
                     temp_jd_move = (move, state.selected_piece)
+                    temp_just_deleted = state.just_deleted
                     val = self.alpha_beta(state, depth+1, alpha, beta, False)
-                    state.undo_move(temp_jd_move)  # Must implement this method.
+                    state.undo_move(temp_jd_move, temp_just_deleted)  # Must implement this method.
                     if depth == 0: self.alpha_beta_val.append(val)
                     if max_player and val > alpha:
                         if depth == 0:
@@ -433,6 +435,7 @@ class Player_AlphaBeta:
                 # print("black piece list is ", state.black_piece_list)
                 state.highlight_potential_moves(piece)
                 sel_piece = state.selected_piece
+                rp_to_remove_list = state.red_pieces_to_remove_list
                 # print("state.black_piece_list is ", state.black_piece_list)
                 for move in state.black_piece_potential_move_list:
                     # print("++ bp_potential_move is ", move)
@@ -440,16 +443,16 @@ class Player_AlphaBeta:
                     state.selected_piece = sel_piece
                     state.do_move(move)
                     temp_jd_move = (move, state.selected_piece)
-                    # print("temp_jd_move is ", temp_jd_move)
+                    temp_just_deleted = state.just_deleted
                     val = self.alpha_beta(state, depth+1, alpha, beta, False)  
-                    state.undo_move(temp_jd_move)  # Must implement this method.
+                    state.undo_move(temp_jd_move, temp_just_deleted)  # Must implement this method.
                     if depth == 0: self.alpha_beta_val.append(val)
                     if max_player and val > alpha:
                         if depth == 0:
                             self.temp_best_move_B = temp_jd_move[0]
                             self.temp_best_selected_piece_B = temp_jd_move[1]
                             self.temp_best_just_done_move_B = temp_jd_move
-                            self.temp_red_pieces_to_remove_list_B = state.red_pieces_to_remove_list
+                            self.temp_red_pieces_to_remove_list_B = rp_to_remove_list
                         alpha = val
                     elif not max_player and val < beta:
                         beta = val
