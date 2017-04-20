@@ -18,8 +18,8 @@ from Project_GameState import GameState as P1GameState
 from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
-P1Player = None
-P2Player = Project_GameState.Player_AlphaBeta(1, 0)
+P1Player = Project_GameState.Player_AlphaBeta(1, 0)
+P2Player = None # Project_GameState.Player_AlphaBeta(2, 0)
 
 # The basic Checkers class.
 class Checkers:
@@ -124,9 +124,15 @@ class Checkers:
             self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
             self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece_B
 
+            # Updating the red pieces to remove list.
             self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
             self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
             self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+
+            # Updating the black pieces to remove list.
+            self.display_state.black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[0].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[1].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
             
 
         print("do move")
