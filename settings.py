@@ -68,4 +68,11 @@ BLACK_CAN_BECOME_KING_R = [(2,3)]
 BLACK_CAN_BECOME_KING_B = [(1,0), (1,2), (1,4), (1,6)]
 BLACK_CAN_BECOME_KING_KING_LIST_B = [(1,0), (1,2)]
 
+# Positions where black AI will always jump
+BLACK_AI_WILL_JUMP_R = [(2,5), (1,0)]
+BLACK_AI_WILL_JUMP_B = [(4,3), (6,5)]
+BLACK_AI_WILL_JUMP_B_KING_LIST = [(1,0), (1,2)]
+
+
+
 
