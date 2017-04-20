@@ -71,7 +71,6 @@ class GameState:
             print("DOING ILLEGAL MOVE")
             return
 
-
         # Used to determine the action direction the move took.
         action_taken = ( new_pos[0] - self.selected_piece[0],
                          new_pos[1] - self.selected_piece[1])
@@ -125,6 +124,8 @@ class GameState:
 
         # If the player is black then execute his move.
         if (self.__player == 1):
+            print("player is 1")
+            print("self.red_pieces_to_remove_list is ", self.red_pieces_to_remove_list)
             # If a jump was executed, removed all elements jumped.
             for piece in self.red_pieces_to_remove_list:
                 # If the piece's action to get there is the same as we used to get here
@@ -132,7 +133,7 @@ class GameState:
                 if piece[1] == action_direction:
                     self.red_piece_list.remove(piece[0]) # Remove from board.
                     self.just_deleted = piece[0]
-            self.red_pieces_to_remove_list = [] # Reinitialize list.
+            # MAYBE self.red_pieces_to_remove_list = [] # Reinitialize list.
             
             # Grab index of selected tile
             # # print("self.selected_piece is ", self.selected_piece)
@@ -195,6 +196,7 @@ class GameState:
         self.black_piece_potential_move_list = []
         self.red_pieces_to_remove_list = []
         self.black_pieces_to_remove_list = []
+        self.red_pieces_to_remove_list = [] # Reinitialize list.
         self.just_done_move = None
 
         # Grab potential_moves depending on the player.
@@ -367,6 +369,8 @@ class Player_AlphaBeta:
         # do your alpha beta (or ID-AB) search here
         ab_value = self.alpha_beta(state, 0, -1000000, 1000000, True)
         # return the best move computer by alpha_beta
+        print("++++++++alpha beta value received")
+        print("self.temp_best_just_done_move is ", self.temp_best_just_done_move)
         return self.temp_best_move # Return the best move.
 
     def is_terminal(self, state, depth):
@@ -408,7 +412,7 @@ class Player_AlphaBeta:
         # Look for best move if black piece.
         elif(state.player_to_move() == 1):
             for piece in state.black_piece_list:
-                print("black piece list is ", state.black_piece_list)
+                # print("black piece list is ", state.black_piece_list)
                 state.highlight_potential_moves(piece)
                 # print("state.black_piece_list is ", state.black_piece_list)
                 for move in state.black_piece_potential_move_list:
@@ -420,6 +424,8 @@ class Player_AlphaBeta:
                         if depth == 0:
                             self.temp_best_move = move
                             self.temp_best_selected_piece = state.selected_piece
+                            self.temp_best_just_done_move = state.just_done_move
+                            self.temp_red_pieces_to_remove_list = state.red_pieces_to_remove_list
                             alpha = val
                         elif not max_player and val < beta:
                             beta = val
