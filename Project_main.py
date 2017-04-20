@@ -25,7 +25,7 @@ P2Player = Project_GameState.Player_AlphaBeta(1, 0)
 class Checkers:
     # The init function where we initalize important information about pygame and checkers.
     def __init__(self):
-        print("+INITIALIZED+")
+        print("+INITIALIZED77777+")
         pg.init() # This initializes pygame, must be done.
         pg.display.set_caption(TITLE) # Sets title of the window as defined in settings.
         self.clock = pg.time.Clock() # Used to set the FPS.
@@ -116,11 +116,18 @@ class Checkers:
         # This if statement is used to change the selected index to the one alpha beta
         # generated when it found the best move.
         if self.players[player] != None:
-            print("AI temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
-            print("AI temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
+            print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move)
+            print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece)
+            print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list)
+            print("move is ", move)
             self.display_state.selected_piece =  self.players[player].temp_best_selected_piece
             self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
             self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece
+
+            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
+            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
+            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list
+            
 
         print("do move")
         # Check for winner and do move.
