@@ -1,5 +1,6 @@
 import sys
 import pygame as pg
+import Project_GameState
 from settings import *
 
 # What each module does
@@ -17,7 +18,7 @@ from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
 P1Player = None
-P2Player = None
+P2Player = Project_GameState.Player_AlphaBeta(2, 2000)
 
 # The basic Checkers class.
 class Checkers:
@@ -42,8 +43,9 @@ class Checkers:
 
     # The main game update loop of the application
     def update(self):
-        # This sets a limit on how fast our computers process the drawing code.
+        # This sets a limit on how fast our computers process the drawing code.\
         self.dt = self.clock.tick(FPS) / 1000
+        self.do_turn()
         self.events() # This will check for any input.
         self.draw() # Draw everything on the screen.
 
@@ -103,16 +105,30 @@ class Checkers:
 
     # This will execute a move when passed a new row/column location.
     def do_move(self, move):
+        print("do_turn move is ", move)
+        player = self.display_state.player_to_move()
+
+        # This if statement is used to change the selected index to the one alpha beta
+        # generated when it found the best move.
+        if self.players[player] != None:
+            print("AI best move is ", self.players[player].temp_best_selected_piece)
+            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece
+            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
+            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece
+
+        # Check for winner and do move.
+        self.winner = self.display_state.winner()
         self.display_state.do_move(move)
         self.player_states[0].do_move(move)
         self.player_states[1].do_move(move)
 
     # This function will do a basic move
     def do_turn(self):
-        # self.winner = self.display_state.player_to_move() This will check a winner in display state
-
+        # print("do turn")
+        self.winner = self.display_state.winner()
         if self.winner == PLAYER_NONE:              # there is no winner yet, so get the next move from the AI
             player = self.display_state.player_to_move()    # get the next player to move from the state
+            # print("------ ", player)
             if self.players[player] != None:        # if the current player is an AI, get its move
                 self.do_move(self.players[player].get_move(self.player_states[player]))
         
