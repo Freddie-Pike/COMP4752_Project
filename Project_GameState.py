@@ -392,6 +392,68 @@ class Player_AlphaBeta:
         if (self.current_maxd > 0 and depth >= self.current_maxd):
             return True
         return state.winner() != PLAYER_NONE
+
+    # Grab a random move, used for a random move AI.
+    def get_random_move(self, state):
+        '''
+            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece_B
+
+            # Updating the red pieces to remove list.
+            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+
+            # Updating the black pieces to remove list.
+            self.display_state.black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[0].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[1].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+        '''
+
+        # Look for red piece random move if red player
+        if(state.player_to_move() == 0):
+            # Grab random piece from list.
+            random_piece = random.choice(state.red_piece_list)
+            state.highlight_potential_moves(random_piece) # Grab piece's potential moves.
+            
+            # Keep on grabbing potential moves on a piece until we get one that's not empty.
+            while True:
+                # Found a non empty list so break.
+                if len(state.red_piece_potential_move_list) != 0: break
+                random_piece = random.choice(state.red_piece_list)
+                state.highlight_potential_moves(random_piece)
+
+            
+            print("FINAL - potential moves of piece are ", state.red_piece_potential_move_list)
+            print("random pot choice is ", random.choice(state.red_piece_potential_move_list))
+
+            # Grab a random choice from the potential moves and return it.
+            return random.choice(state.red_piece_potential_move_list)
+
+        # Look for black piece random move if black player
+        elif (state.player_to_move() == 1):
+            # Grab random piece from list.
+            random_piece = random.choice(state.black_piece_list)
+            state.highlight_potential_moves(random_piece) # Grab piece's potential moves.
+            
+            # Keep on grabbing potential moves on a piece until we get one that's not empty.
+            while True:
+                # Found a non empty list so break.
+                if len(state.black_piece_potential_move_list) != 0: break
+                random_piece = random.choice(state.black_piece_list)
+                state.highlight_potential_moves(random_piece)
+
+            # Grab a random choice from the potential moves to be returned.
+            random_move = random.choice(state.black_piece_potential_move_list)
+
+            # Some "bookkeeping" so things work correctly in main.
+            self.temp_best_selected_piece_B = state.selected_piece
+            self.temp_red_pieces_to_remove_list_B = state.red_pieces_to_remove_list
+            self.temp_black_pieces_to_remove_list = state.black_pieces_to_remove_list
+
+            return random_move
+            
     
     def alpha_beta(self, state, depth, alpha, beta, max_player):
         # If terminal then return= the evaluation.
