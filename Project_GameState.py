@@ -62,12 +62,13 @@ class GameState:
 
     # This will execute a move when passed a new row/column location.
     def do_move(self, new_pos):
-        # # print("do_move ------------------------------------")
+        # print("new_pos is ", new_pos)
         self.just_deleted = None
         # If the move is illegal, then return.
         # # print("new_pos is ", new_pos)
         if not self.is_legal(new_pos):
-            # print("DOING ILLEGAL MOVE")
+            self.__player = self.opponent(self.__player)
+            print("DOING ILLEGAL MOVE")
             return
 
 
@@ -136,6 +137,7 @@ class GameState:
             # Grab index of selected tile
             # # print("self.selected_piece is ", self.selected_piece)
             # # print("self.black_piece_list is ", self.black_piece_list)
+            # print("black piece selected index is ", self.selected_piece) 
             piece_index = self.black_piece_list.index(self.selected_piece)
 
             # If piece is a king, must update it's location in red_king_piece_list.
@@ -154,6 +156,7 @@ class GameState:
 
         # Swap players so the next player gets the turn.
         self.__player = self.opponent(self.__player)
+        # print("self.__player is ", self.__player)
         
 
     # Undo the last done move in the gamestate.
@@ -162,8 +165,8 @@ class GameState:
         # If the player is red, undo the red move and pass it to black.
         if (self.__player == 0):
             # Remove the new postion piece and add the old position back in.
-            self.black_piece_list.remove(self.just_done_move[0])
-            self.black_piece_list.append(self.just_done_move[1])
+            piece_index = self.black_piece_list.index(self.just_done_move[0])
+            self.black_piece_list[piece_index] = self.just_done_move[1]
 
             # If we deleted a piece then put it back in.
             if self.just_deleted != None:
@@ -172,8 +175,8 @@ class GameState:
         # If the player is black, undo the red move and pass it to red.
         elif (self.__player == 1):
             # Remove the new postion piece and add the old position back in.
-            self.red_piece_list.remove(self.just_done_move[0])
-            self.red_piece_list.append(self.just_done_move[1])
+            piece_index = self.red_piece_list.index(self.just_done_move[0])
+            self.red_piece_list[piece_index] = self.just_done_move[1]
 
             # If we deleted a piece then put it back in.
             if self.just_deleted != None:
@@ -308,7 +311,7 @@ class GameState:
         else: 
             return PLAYER_NONE
 
-        # The Heuristic will be put in this function.
+    # The Heuristic will be put in this function.
     def eval(self, player):
         # print("in eval")
         score = 0
@@ -335,13 +338,12 @@ class GameState:
 
 # This will later will be used to implement alphabeta.
 class Player_AlphaBeta:
-
     def __init__(self, max_depth, time_limit):
-        self.max_depth = 2      # set the max depth of search
+        self.max_depth = max_depth      # set the max depth of search
         self.time_limit = time_limit    # set the time limit (in milliseconds)
         self.best_move = -1             # record the best move found so far
         self.reset()
-        self.current_maxd=max_depth
+        self.current_maxd = max_depth
         
         # # print('initailized player alpha beta')
         # Add more class variables here as necessary (you will probably need more)
@@ -355,6 +357,7 @@ class Player_AlphaBeta:
         self.alpha_beta_val = []
 
     def get_move(self, state):
+        print("get_move ----------------")
         # reset the variables
         self.reset()
         # store the time that we started calculating this move, so we can tell how much time has passed
@@ -362,12 +365,14 @@ class Player_AlphaBeta:
         # store the player that we're deciding a move for and set it as a class variable
         self.player = state.player_to_move()
         # do your alpha beta (or ID-AB) search here
-        # # print('get move CALLED')
         ab_value = self.alpha_beta(state, 0, -1000000, 1000000, True)
         # return the best move computer by alpha_beta
         return self.temp_best_move # Return the best move.
 
     def is_terminal(self, state, depth):
+        # print("in terminal")
+        # print("depth is ", depth)
+        # print("current_maxd is ", self.current_maxd)
         if (self.current_maxd > 0 and depth >= self.current_maxd):
             return True
         return state.winner() != PLAYER_NONE
@@ -376,11 +381,14 @@ class Player_AlphaBeta:
         # If terminal then return the evaluation.
         if (self.is_terminal(state, depth)): 
             # print('its terminal')
-            return state.eval(self.player) 
+            return state.eval(self.player)
+
+        print("player is ", state.player_to_move())
 
         # Look for best move if red piece.
         if(state.player_to_move() == 0):
             for piece in state.red_piece_list:
+                # print("state.red_piece_list is ", state.red_piece_list)
                 state.highlight_potential_moves(piece)
                 for move in state.red_piece_potential_move_list:
                     state.do_move(move)
@@ -400,7 +408,9 @@ class Player_AlphaBeta:
         # Look for best move if black piece.
         elif(state.player_to_move() == 1):
             for piece in state.black_piece_list:
+                print("black piece list is ", state.black_piece_list)
                 state.highlight_potential_moves(piece)
+                # print("state.black_piece_list is ", state.black_piece_list)
                 for move in state.black_piece_potential_move_list:
                     state.do_move(move)
                     val = self.alpha_beta(state, depth+1, alpha, beta, False)  
@@ -416,8 +426,5 @@ class Player_AlphaBeta:
                         if alpha >= beta:
                             break
             # print("alpha is ", alpha)
-            # print("beta is ", beta)
-            # print("self.temp_best_move is ", self.temp_best_move)
-            # print("temp_best_selected_piece is ", self.temp_best_selected_piece)
             return alpha if max_player else beta
     
