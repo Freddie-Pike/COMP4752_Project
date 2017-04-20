@@ -18,7 +18,7 @@ from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
 P1Player = None
-P2Player = Project_GameState.Player_AlphaBeta(2, 2000)
+P2Player = Project_GameState.Player_AlphaBeta(1, 2000)
 
 # The basic Checkers class.
 class Checkers:
