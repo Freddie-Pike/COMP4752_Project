@@ -18,8 +18,8 @@ from Project_GameState import GameState as P1GameState
 from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
-P1Player = Project_GameState.Player_AlphaBeta(1, 0)
-P2Player = None # Project_GameState.Player_AlphaBeta(2, 0)
+P1Player = None # Project_GameState.Player_AlphaBeta(1, 0)
+P2Player = Project_GameState.Player_AlphaBeta(1, 0) # Project_GameState.Player_AlphaBeta(2, 0)
 
 # The basic Checkers class.
 class Checkers:
@@ -116,7 +116,7 @@ class Checkers:
         # This if statement is used to change the selected index to the one alpha beta
         # generated when it found the best move.
         if self.players[player] != None:
-            print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move_B)
+            # print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move_B)
             print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece_B)
             print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list_B)
             print("move is ", move)
@@ -163,7 +163,14 @@ class Checkers:
             # print("------ ", player)
             if self.players[player] != None:        # if the current player is an AI, get its move
                 print("About to do turn")
-                self.do_move(self.players[player].get_move(self.player_states[player]))
+
+                # Comment out this line if you want a random move.
+                # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+
+                # Uncomment out this line if you want a random move
+                self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random move.
+
+                
         
             
     # Returns the tile (r,c) on the grid underneath a given mouse position in pixels
@@ -198,6 +205,8 @@ class Checkers:
                 # If D is pressed down, print debuging information
                 if event.key == pg.K_d:
                     print("Debugging is cool")
+                    player = self.display_state.player_to_move()
+                    # print("-- random is ", self.players[0].get_random_move(self.player_states[player]))
                     print("Display state red pieces are ", self.display_state.red_piece_list)
 
             # Check if a mousebutton is pressed down.
