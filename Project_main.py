@@ -1,5 +1,7 @@
 import sys
 import pygame as pg
+import logging
+import Project_GameState
 from settings import *
 
 # What each module does
@@ -16,13 +18,14 @@ from Project_GameState import GameState as P1GameState
 from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
-P1Player = None
-P2Player = None
+P1Player = Project_GameState.Player_AlphaBeta(2, 0) # Project_GameState.Player_AlphaBeta(1, 0)
+P2Player = Project_GameState.Player_AlphaBeta(1, 0) # Project_GameState.Player_AlphaBeta(2, 0)
 
 # The basic Checkers class.
 class Checkers:
     # The init function where we initalize important information about pygame and checkers.
     def __init__(self):
+        print("+INITIALIZED77777+")
         pg.init() # This initializes pygame, must be done.
         pg.display.set_caption(TITLE) # Sets title of the window as defined in settings.
         self.clock = pg.time.Clock() # Used to set the FPS.
@@ -42,8 +45,9 @@ class Checkers:
 
     # The main game update loop of the application
     def update(self):
-        # This sets a limit on how fast our computers process the drawing code.
+        # This sets a limit on how fast our computers process the drawing code.\
         self.dt = self.clock.tick(FPS) / 1000
+        self.do_turn()
         self.events() # This will check for any input.
         self.draw() # Draw everything on the screen.
 
@@ -103,19 +107,64 @@ class Checkers:
 
     # This will execute a move when passed a new row/column location.
     def do_move(self, move):
+        print("about to do move")
+        player = self.display_state.player_to_move()
+        print("do move player is ", player)
+        print("self.players[player] is ", self.players[player])
+        print("move is ", move)
+
+        # This if statement is used to change the selected index to the one alpha beta
+        # generated when it found the best move.
+        if self.players[player] != None:
+            # print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move_B)
+            # print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece_B)
+            # print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list_B)
+            print("move is ", move)
+            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
+            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece_B
+
+            # Updating the red pieces to remove list.
+            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
+
+            # Updating the black pieces to remove list.
+            self.display_state.black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[0].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            self.player_states[1].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
+            
+
+        print("do move")
+        # Check for winner and do move.
+        self.winner = self.display_state.winner()
         self.display_state.do_move(move)
         self.player_states[0].do_move(move)
         self.player_states[1].do_move(move)
 
     # This function will do a basic move
     def do_turn(self):
-        # self.winner = self.display_state.player_to_move() This will check a winner in display state
-
+        # print("do turn")
+        self.winner = self.display_state.winner()
         if self.winner == PLAYER_NONE:              # there is no winner yet, so get the next move from the AI
             player = self.display_state.player_to_move()    # get the next player to move from the state
+            # print("------ ", player)
             if self.players[player] != None:        # if the current player is an AI, get its move
-                self.do_move(self.players[player].get_move(self.player_states[player]))
-        
+                print("About to do turn")
+                
+                if (player == 0):
+                    # Uncomment out this line if you want a AB move.
+                    # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+
+                    # Uncomment out this line if you want a random move
+                    self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random move.
+                elif (player == 1):
+                    # Uncomment out this line if you want a AB move.
+                    # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+
+                    # Uncomment out this line if you want a random move
+                    self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random mov
+                    
             
     # Returns the tile (r,c) on the grid underneath a given mouse position in pixels
     def get_tile(self, mpos):
@@ -149,6 +198,8 @@ class Checkers:
                 # If D is pressed down, print debuging information
                 if event.key == pg.K_d:
                     print("Debugging is cool")
+                    player = self.display_state.player_to_move()
+                    # print("-- random is ", self.players[0].get_random_move(self.player_states[player]))
                     print("Display state red pieces are ", self.display_state.red_piece_list)
 
             # Check if a mousebutton is pressed down.
@@ -172,7 +223,6 @@ class Checkers:
                     self.player_states[0].highlight_potential_moves(move)
                     self.player_states[1].highlight_potential_moves(move)
 
-        
 # This is the main executable part of the program.
 sys.setrecursionlimit(10000) # Can't go past 10000 recursive depth.
 
