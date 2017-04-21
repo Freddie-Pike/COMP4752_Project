@@ -33,14 +33,13 @@ class Checkers:
         self.width  = self.display_state.cols() * TILESIZE # Width of screen.
         self.height = self.display_state.rows() * TILESIZE + 40 # Height of screen.
         self.screen = pg.display.set_mode( (self.width, self.height) ) # Window Size.
-        # self.font = pg.font.SysFont(FONTNAME, FONTSIZE, bold=FONTBOLD) # Used later.
+        self.font = pg.font.SysFont(FONTNAME, FONTSIZE, bold=FONTBOLD) # Used later.
         self.winner = PLAYER_NONE # Won't need to worry about this for now.
-        # self.text_position = (10, self.height-35) # Used later.
+        self.text_position = (10, self.height-35) # Used later.
         self.player_states = [P1GameState(BOARD_ROWS, BOARD_COLS), P2GameState(BOARD_ROWS, BOARD_COLS)]
         self.players = [P1Player, P2Player]
 
         # Variables used to create the checkerboard pattern background.
-        self.screen.fill(BLACK) # Fill the Background black.
         self.flip_color = True # Used to switch background colors when drawing the board.
 
     # The main game update loop of the application
@@ -55,6 +54,14 @@ class Checkers:
     def draw(self):
         # Add another parameter for king color.
         self.draw_board() # Draw the basic checkerboard for the background.
+
+        # Determine if there's a winner.
+        player = self.display_state.player_to_move()
+        if (self.winner == PLAYER_NONE):
+            self.draw_text(PLAYER_NAMES[player] + (": Human" if self.players[player] == None else ": AI Thinking"), self.text_position, PIECECOLOR[player])
+        else:    
+            self.draw_text(GAME_RESULT_STRING[self.winner], self.text_position, PIECECOLOR[self.winner])
+        
         self.draw_piece_list(self.screen, self.display_state.red_piece_list, RED, 2) # Draw all the red pieces.
         self.draw_piece_list(self.screen, self.display_state.black_piece_list, BLACK, 2) # Draw all the black pieces.
 
@@ -67,6 +74,7 @@ class Checkers:
     def draw_board(self):
         # This must always be reinitialized or else colors will constantly be flashing.
         self.flip_color = True
+        self.screen.fill(BG_COLOR_1) # Fill the Background to BG Colour 2.
         
         # Draw all the tiles on the screen.
         # NOTE: We don't use drawrect to create a rectangle but we instead fill the part
@@ -97,6 +105,11 @@ class Checkers:
             else:
                 pg.draw.circle(surface, color, (col*TILESIZE+TILESIZE//2, row*TILESIZE+TILESIZE//2), TILESIZE//2-PIECEPAD)
 
+    # draw some text with the given arguments
+    def draw_text(self, text, pos, color):
+        label = self.font.render(text, 1, color)
+        self.screen.blit(label, pos)
+        
     # reset the game to a the default state board
     def reset(self):
         print("Reset")
@@ -153,17 +166,19 @@ class Checkers:
                 print("About to do turn")
                 
                 if (player == 0):
+                    # NOTE: If both uncommented, program will break.
                     # Uncomment out this line if you want a AB move.
                     # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
 
                     # Uncomment out this line if you want a random move
                     self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random move.
                 elif (player == 1):
+                    # NOTE: If both uncommented, program will break.
                     # Uncomment out this line if you want a AB move.
-                    # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+                    self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
 
                     # Uncomment out this line if you want a random move
-                    self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random mov
+                    # self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random mov
                     
             
     # Returns the tile (r,c) on the grid underneath a given mouse position in pixels
