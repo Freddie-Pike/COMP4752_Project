@@ -328,23 +328,57 @@ class GameState:
         score = 0
         if(self.winner() == player):
             score = 1000000
-            # # print("winning move")
+            print("winning move")
             return score
         elif(self.winner() == ((player + 1) % 2)):
             score = -1000000
-            # # print("losing move")
+            print("losing move")
             return score
         else:
             if(player == PLAYER_ONE):
-                score += ((len(self.red_piece_list) - len(self.black_piece_list)) * 100)
-                score += ((len(self.red_king_piece_list) - len(self.black_king_piece_list)) * 25)
+                score += ((len(self.red_piece_list) - len(self.black_piece_list)) * 100) ##check diff in num pieces
+                score += ((len(self.red_king_piece_list) - len(self.black_king_piece_list)) * 25) ##diff in king pieces (worth extra over reg pieces)
 
-                ##for pieces in red_piece_list
+                for red_piece in self.red_piece_list: ##check for runaway pieces
+                    check_this = red_piece[1]
+                    runaway_piece = True
+
+                    for king in self.red_king_piece_list: ##if this piece is already a king its not a runaway piece
+                        if(king == red_piece):
+                            runaway_piece = False
+
+                    for black_piece in self.black_piece_list:
+                        if(black_piece[1] == red_piece[1] and red_piece[0] < black_piece[0]):
+                            runaway_piece = False
+                    if(runaway_piece):
+                        score += 10 ##add 10 points for each piece with an open path to becoming a king
+                                
+                ##generate a small random variation in score so when multiple moves result in the same score, it will pick a random one, instead of the first one, it wont be enough score to affect the AI's choice in any other situation
+                score += randint(0, 5)                
+
+                return score
+
             else:
-                score += ((len(self.black_piece_list) - len(self.red_piece_list)) * 100)
-                score += ((len(self.black_king_piece_list) - len(self.red_king_piece_list)) * 25)
-            # # print("no one has won yet")
-            return score
+                score += ((len(self.black_piece_list) - len(self.red_piece_list)) * 100) ##check diff in num pieces
+                score += ((len(self.black_king_piece_list) - len(self.red_king_piece_list)) * 25) ##diff in king pieces (worth extra over reg pieces)
+
+                for black_piece in self.black_piece_list: ##we for runaway pieces in this part
+                    runaway_piece = True
+                    
+                    for king in self.black_king_piece_list: ##if this piece is already a king its not a runaway piece
+                        if(king == black_piece):
+                            runaway_piece = False
+
+                    for red_piece in self.red_piece_list: ## if theres a red piece in the same row and is ahead of it of it in the column it cant be a runaway
+                        if(red_piece[1] == black_piece[1] and red_piece[0] < black_piece[0]):
+                            runaway_piece = False
+                    if(runaway_piece):
+                        score += 10 ##add 10 points for each piece with no opposing checkers ahead of it in its row to prevent it from becoming a king
+
+                ##generate a small random variation in score so when multiple moves result in the same score, it will pick a random one, instead of the first one, it wont be enough score to affect the AI's choice in any other situation
+                score += randint(0, 5)
+
+                return score
 
 
 # This will later will be used to implement alphabeta.
@@ -369,7 +403,6 @@ class Player_AlphaBeta:
         self.alpha_beta_val = []
 
     def get_move(self, state):
-        print("get_move ----------------")
         # reset the variables
         self.reset()
         # store the time that we started calculating this move, so we can tell how much time has passed
@@ -379,9 +412,6 @@ class Player_AlphaBeta:
         # do your alpha beta (or ID-AB) search here
         ab_value = self.alpha_beta(state, 0, -1000000, 1000000, True)
         # return the best move computer by alpha_beta
-        print("++++++++alpha beta value received")
-        print("self.temp_best_just_done_move_B is ", self.temp_best_just_done_move_B)
-        print("state.just_done_move is ", state.just_done_move)
         return self.temp_best_move_B # Return the best black move.
         # elif (state.player_to_move() == 1):
 
@@ -395,22 +425,7 @@ class Player_AlphaBeta:
 
     # Grab a random move, used for a random move AI.
     def get_random_move(self, state):
-        '''
-            self.display_state.selected_piece =  self.players[player].temp_best_selected_piece_B
-            self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
-            self.player_states[1].selected_piece =  self.players[player].temp_best_selected_piece_B
-
-            # Updating the red pieces to remove list.
-            self.display_state.red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
-            self.player_states[0].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
-            self.player_states[1].red_pieces_to_remove_list = self.players[player].temp_red_pieces_to_remove_list_B
-
-            # Updating the black pieces to remove list.
-            self.display_state.black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
-            self.player_states[0].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
-            self.player_states[1].black_pieces_to_remove_list = self.players[player].temp_black_pieces_to_remove_list
-        '''
-
+        print("+_+_+_+_+_+_+ RANDOM +_+_+_+_+_+")
         # Look for red piece random move if red player
         if(state.player_to_move() == 0):
             # Grab random piece from list.
@@ -424,10 +439,11 @@ class Player_AlphaBeta:
                 random_piece = random.choice(state.red_piece_list)
                 state.highlight_potential_moves(random_piece)
 
+            # Some "clean up" so things work correctly in main.
+            self.temp_best_selected_piece_B = state.selected_piece
+            self.temp_red_pieces_to_remove_list_B = state.red_pieces_to_remove_list
+            self.temp_black_pieces_to_remove_list = state.black_pieces_to_remove_list
             
-            print("FINAL - potential moves of piece are ", state.red_piece_potential_move_list)
-            print("random pot choice is ", random.choice(state.red_piece_potential_move_list))
-
             # Grab a random choice from the potential moves and return it.
             return random.choice(state.red_piece_potential_move_list)
 
@@ -447,7 +463,7 @@ class Player_AlphaBeta:
             # Grab a random choice from the potential moves to be returned.
             random_move = random.choice(state.black_piece_potential_move_list)
 
-            # Some "bookkeeping" so things work correctly in main.
+            # Some "clean up" so things work correctly in main.
             self.temp_best_selected_piece_B = state.selected_piece
             self.temp_red_pieces_to_remove_list_B = state.red_pieces_to_remove_list
             self.temp_black_pieces_to_remove_list = state.black_pieces_to_remove_list
