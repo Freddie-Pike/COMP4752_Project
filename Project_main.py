@@ -18,7 +18,7 @@ from Project_GameState import GameState as P1GameState
 from Project_GameState import GameState as P2GameState
 
 # set which Player object you will use for each Player in the game
-P1Player = None # Project_GameState.Player_AlphaBeta(1, 0)
+P1Player = Project_GameState.Player_AlphaBeta(2, 0) # Project_GameState.Player_AlphaBeta(1, 0)
 P2Player = Project_GameState.Player_AlphaBeta(1, 0) # Project_GameState.Player_AlphaBeta(2, 0)
 
 # The basic Checkers class.
@@ -117,8 +117,8 @@ class Checkers:
         # generated when it found the best move.
         if self.players[player] != None:
             # print("AI temp_best_just_done_move is ", self.players[player].temp_best_just_done_move_B)
-            print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece_B)
-            print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list_B)
+            # print("AI self.players[player].temp_best_selected_piece is ", self.players[player].temp_best_selected_piece_B)
+            # print("AI self.players[player].temp_red_pieces_to_remove_list is ", self.players[player].temp_red_pieces_to_remove_list_B)
             print("move is ", move)
             self.display_state.selected_piece =  self.players[player].temp_best_selected_piece_B
             self.player_states[0].selected_piece =  self.players[player].temp_best_selected_piece_B
@@ -138,21 +138,9 @@ class Checkers:
         print("do move")
         # Check for winner and do move.
         self.winner = self.display_state.winner()
-        print("before self.display_state.red_piece_list is ", len(self.display_state.red_piece_list))
         self.display_state.do_move(move)
-        print()
-        print("after self.display_state.red_piece_list is ", len(self.display_state.red_piece_list))
-        print()
-        print("before - self.player_states[0].red_piece_list is ", len(self.player_states[0].red_piece_list))
         self.player_states[0].do_move(move)
-        print()
-        print("after - self.player_states[0].red_piece_list is ", len(self.player_states[0].red_piece_list))
-        print()
-        print("before - self.player_states[1].red_piece_list is ", len(self.player_states[1].red_piece_list))
         self.player_states[1].do_move(move)
-        print()
-        print("after - self.player_states[1].red_piece_list is ", len(self.player_states[1].red_piece_list))
-        print("MAIN DO MOVE FINISHED")
 
     # This function will do a basic move
     def do_turn(self):
@@ -163,15 +151,20 @@ class Checkers:
             # print("------ ", player)
             if self.players[player] != None:        # if the current player is an AI, get its move
                 print("About to do turn")
-
-                # Comment out this line if you want a random move.
-                # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
-
-                # Uncomment out this line if you want a random move
-                self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random move.
-
                 
-        
+                if (player == 0):
+                    # Uncomment out this line if you want a AB move.
+                    # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+
+                    # Uncomment out this line if you want a random move
+                    self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random move.
+                elif (player == 1):
+                    # Uncomment out this line if you want a AB move.
+                    # self.do_move(self.players[player].get_move(self.player_states[player])) # Get an alpha beta move.
+
+                    # Uncomment out this line if you want a random move
+                    self.do_move(self.players[player].get_random_move(self.player_states[player])) # Get a random mov
+                    
             
     # Returns the tile (r,c) on the grid underneath a given mouse position in pixels
     def get_tile(self, mpos):
