@@ -6,11 +6,18 @@ YELLOW      = (255, 255,   0)
 BG_COLOR_1  = (126,  87,  78) # Background colour 1
 BG_COLOR_2  = (237, 221, 204) # Background colour 2
 GOLD        = (238, 232, 170) # The King colour trim.
+PIECECOLOR  = [RED, BLACK, WHITE, WHITE]
 
 # Game Settings
 FPS = 30
 TITLE     = "COMP 4752 - Checkers"
 TILESIZE  = 80 # used to draw the board.
+PIECEPAD    = 5
+# Font settings
+FONTNAME  = "monospace"
+FONTSIZE  = 30
+FONTBOLD  = True
+
 
 # Lists containing the default positions of red/black checker locations
 STARTING_RED_POSITIONS = [(0,1), (0,3), (0,5), (0,7), (1,0), (1,2), (1,4), (1,6), (2,1), (2,3), (2,5), (2,7) ]
@@ -37,7 +44,10 @@ PLAYER_NONE = 2
 DRAW        = 3
 BOARD_ROWS  = 8
 BOARD_COLS  = 8
-PIECEPAD    = 5
+
+# Result strings for when player wins.
+PLAYER_NAMES = ["Player One", "Player Two", "Player None", "Draw"]
+GAME_RESULT_STRING = ["Player One Wins!", "Player Two Wins!", "Game In Progress", "Game is a Draw!"]
 
 # A list of Arrays that have starting positions for debugging. Insert them into the init function red_piece_list and black_piece_list to test them out.
 
