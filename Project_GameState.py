@@ -1,4 +1,5 @@
 import sys, time, random, copy
+from random import randint
 from settings import *
 
 # This handles the actual game aspect of checkers.
